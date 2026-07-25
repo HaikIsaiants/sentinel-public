@@ -1,0 +1,40 @@
+{
+  "benchmark_id": "sentinel-v1",
+  "benchmark_version": 1,
+  "corpora": {
+    "development": {
+      "count": 2000,
+      "file": "benchmarks/seeds/development.jsonl",
+      "missions_per_stratum": 200,
+      "sha256": "fd78f39374652274055425050edc8118a8087e8b5223b6e267fa321774b648fd"
+    },
+    "holdout": {
+      "count": 10000,
+      "file": "benchmarks/seeds/holdout.jsonl",
+      "missions_per_stratum": 1000,
+      "sha256": "efb46d138ac5af8a62b72f645d349f5440fbf4a3f47a1b306c6edaf8aaca92e5"
+    }
+  },
+  "derivation": "uint64_be(sha256('sentinel-stage1-v1|<corpus>|<stratum>|<stratum_index>')[0:8]) & 0x7fffffffffffffff",
+  "generator": "tools/generate_seeds.py",
+  "order": "strata round-robin in manifest order",
+  "source_sha256": {
+    "config/benchmark.json": "6a479ed528a86a653f4fb4abaa9f73e2284fed818bdda6e620f562e3cb3c0e56",
+    "config/scenario_generation.json": "b6949d249d81cc8b0bb49af70e7e7027676f00a861ccd300ad6c24fde6ebf3e7",
+    "config/scenario_strata.json": "007117d93d94891b7202e42ab8f29f8caa26537d993e43bc072a1f37411ed215",
+    "tools/generate_scenarios.py": "296ea608a4b6b74bf3b03510d818565aa9c77e04725ddc9b693ebde1e706e663",
+    "tools/generate_seeds.py": "c689a4c37b62aea3fb1a1d89f4182ef4d01d1cd69289d654919dc6fe41d83f05"
+  },
+  "strata": [
+    "nominal",
+    "latency_jitter",
+    "packet_loss_reordering",
+    "bandwidth_limited",
+    "temporary_partition",
+    "blocked_route",
+    "dynamic_task_arrival",
+    "agent_loss_degradation",
+    "combined_communications",
+    "compound_disruption"
+  ]
+}

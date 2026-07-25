@@ -1,0 +1,288 @@
+schema_version: 1
+name: "compound-failure-cbba"
+seed: 928451763
+step_ms: 100
+max_ticks: 500
+failure_detection_ticks: 5
+world {
+  width_mm: 8000
+  height_mm: 6000
+  grid_cell_mm: 100
+  map_version: 1
+  regions {
+    id: "central-lane"
+    kind: REGION_KIND_CHOKEPOINT
+    minimum { x_mm: 3500 y_mm: 2500 }
+    maximum { x_mm: 4500 y_mm: 3500 }
+    energy_multiplier_permille: 1000
+  }
+  locations {
+    id: "return-east"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 7500 y_mm: 3000 }
+    radius_mm: 300
+  }
+  locations {
+    id: "return-southwest"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 500 y_mm: 5000 }
+    radius_mm: 300
+  }
+  locations {
+    id: "return-west"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 500 y_mm: 3000 }
+    radius_mm: 300
+  }
+}
+vehicles {
+  id: "uav-alpha"
+  kind: "uav"
+  initial_position { x_mm: 1000 y_mm: 3000 }
+  max_speed_mm_s: 2000
+  initial_energy_mj: 300000
+  energy_cost_mj_per_meter: 800
+  payload_grams: 1000
+  capabilities: CAPABILITY_SEARCH
+  terrain_access: "air"
+  return_location_id: "return-west"
+}
+vehicles {
+  id: "uav-bravo"
+  kind: "uav"
+  initial_position { x_mm: 7000 y_mm: 1000 }
+  max_speed_mm_s: 1800
+  initial_energy_mj: 350000
+  energy_cost_mj_per_meter: 900
+  payload_grams: 1800
+  capabilities: CAPABILITY_SEARCH
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_RELAY
+  terrain_access: "air"
+  return_location_id: "return-east"
+}
+vehicles {
+  id: "ugv-charlie"
+  kind: "ugv"
+  initial_position { x_mm: 1000 y_mm: 5000 }
+  max_speed_mm_s: 1400
+  initial_energy_mj: 450000
+  energy_cost_mj_per_meter: 1200
+  payload_grams: 6000
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "ground"
+  return_location_id: "return-southwest"
+}
+vehicles {
+  id: "ugv-delta"
+  kind: "ugv"
+  initial_position { x_mm: 7000 y_mm: 5000 }
+  max_speed_mm_s: 1600
+  initial_energy_mj: 500000
+  energy_cost_mj_per_meter: 1100
+  payload_grams: 7000
+  capabilities: CAPABILITY_SEARCH
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "ground"
+  return_location_id: "return-east"
+}
+vehicles {
+  id: "uav-echo"
+  kind: "uav"
+  initial_position { x_mm: 7000 y_mm: 3000 }
+  max_speed_mm_s: 2000
+  initial_energy_mj: 400000
+  energy_cost_mj_per_meter: 850
+  payload_grams: 3000
+  capabilities: CAPABILITY_SEARCH
+  capabilities: CAPABILITY_RELAY
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "air"
+  return_location_id: "return-east"
+}
+tasks {
+  id: "delivery-west"
+  kind: "delivery"
+  target { x_mm: 2000 y_mm: 5000 }
+  required_capability: CAPABILITY_DELIVERY
+  payload_required_grams: 4000
+  deadline_tick: 470
+  completion_radius_mm: 100
+  assigned_agent_id: "ugv-delta"
+  released: true
+  service_ticks: 8
+  service_energy_mj_per_tick: 700
+  priority: 65
+}
+tasks {
+  id: "inspect-west"
+  kind: "inspection"
+  target { x_mm: 2000 y_mm: 5000 }
+  required_capability: CAPABILITY_INSPECTION
+  deadline_tick: 300
+  completion_radius_mm: 100
+  assigned_agent_id: "ugv-charlie"
+  released: true
+  service_ticks: 6
+  service_energy_mj_per_tick: 500
+  priority: 55
+}
+tasks {
+  id: "relay-priority"
+  kind: "relay"
+  target { x_mm: 5500 y_mm: 3000 }
+  required_capability: CAPABILITY_RELAY
+  deadline_tick: 450
+  completion_radius_mm: 100
+  released: false
+  service_ticks: 8
+  service_energy_mj_per_tick: 600
+  priority: 100
+}
+tasks {
+  id: "relay-west"
+  kind: "relay"
+  target { x_mm: 1000 y_mm: 1000 }
+  required_capability: CAPABILITY_RELAY
+  deadline_tick: 470
+  completion_radius_mm: 100
+  assigned_agent_id: "uav-bravo"
+  released: true
+  service_ticks: 10
+  service_energy_mj_per_tick: 500
+  priority: 70
+}
+tasks {
+  id: "search-owned"
+  kind: "search"
+  target { x_mm: 1000 y_mm: 3000 }
+  required_capability: CAPABILITY_SEARCH
+  deadline_tick: 480
+  completion_radius_mm: 100
+  assigned_agent_id: "uav-alpha"
+  released: true
+  service_ticks: 100
+  service_energy_mj_per_tick: 400
+  priority: 85
+}
+events {
+  id: "partition-alpha-bravo"
+  tick: 10
+  kind: TAPE_EVENT_KIND_SET_LINK_BLOCKED
+  target_id: "uav-alpha"
+  text_value: "uav-bravo"
+  bool_value: true
+}
+events {
+  id: "partition-alpha-charlie"
+  tick: 10
+  kind: TAPE_EVENT_KIND_SET_LINK_BLOCKED
+  target_id: "uav-alpha"
+  text_value: "ugv-charlie"
+  bool_value: true
+}
+events {
+  id: "partition-alpha-delta"
+  tick: 10
+  kind: TAPE_EVENT_KIND_SET_LINK_BLOCKED
+  target_id: "uav-alpha"
+  text_value: "ugv-delta"
+  bool_value: true
+}
+events {
+  id: "partition-alpha-echo"
+  tick: 10
+  kind: TAPE_EVENT_KIND_SET_LINK_BLOCKED
+  target_id: "uav-alpha"
+  text_value: "uav-echo"
+  bool_value: true
+}
+events {
+  id: "close-central-lane"
+  tick: 18
+  kind: TAPE_EVENT_KIND_SET_REGION_CLOSED
+  target_id: "central-lane"
+  bool_value: true
+}
+events {
+  id: "degrade-bravo-speed"
+  tick: 22
+  kind: TAPE_EVENT_KIND_SET_SPEED_PERMILLE
+  target_id: "uav-bravo"
+  value_min: 500
+  value_max: 500
+  rng_stream: "speed-degradation"
+}
+events {
+  id: "degrade-delta-endurance"
+  tick: 26
+  kind: TAPE_EVENT_KIND_SET_ENDURANCE_PERMILLE
+  target_id: "ugv-delta"
+  value_min: 600
+  value_max: 600
+  rng_stream: "endurance-degradation"
+}
+events {
+  id: "release-priority-relay"
+  tick: 28
+  kind: TAPE_EVENT_KIND_RELEASE_TASK
+  target_id: "relay-priority"
+}
+events {
+  id: "heal-alpha-bravo"
+  tick: 35
+  kind: TAPE_EVENT_KIND_SET_LINK_BLOCKED
+  target_id: "uav-alpha"
+  text_value: "uav-bravo"
+  bool_value: false
+}
+events {
+  id: "heal-alpha-charlie"
+  tick: 35
+  kind: TAPE_EVENT_KIND_SET_LINK_BLOCKED
+  target_id: "uav-alpha"
+  text_value: "ugv-charlie"
+  bool_value: false
+}
+events {
+  id: "heal-alpha-delta"
+  tick: 35
+  kind: TAPE_EVENT_KIND_SET_LINK_BLOCKED
+  target_id: "uav-alpha"
+  text_value: "ugv-delta"
+  bool_value: false
+}
+events {
+  id: "heal-alpha-echo"
+  tick: 35
+  kind: TAPE_EVENT_KIND_SET_LINK_BLOCKED
+  target_id: "uav-alpha"
+  text_value: "uav-echo"
+  bool_value: false
+}
+events {
+  id: "disable-alpha"
+  tick: 45
+  kind: TAPE_EVENT_KIND_DISABLE_VEHICLE
+  target_id: "uav-alpha"
+}
+events {
+  id: "open-central-lane"
+  tick: 55
+  kind: TAPE_EVENT_KIND_SET_REGION_CLOSED
+  target_id: "central-lane"
+  bool_value: false
+}
+network_profile: "connected"
+allocation_policy: ALLOCATION_POLICY_SENTINEL_CBBA
+network_profiles {
+  id: "connected"
+  latency_ticks: 1
+  jitter_ticks: 0
+  packet_loss_permyriad: 0
+  bandwidth_bytes_per_tick: 16384
+  reorder_permyriad: 0
+  reorder_window_ticks: 0
+}

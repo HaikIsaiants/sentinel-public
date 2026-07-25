@@ -1,0 +1,166 @@
+schema_version: 1
+name: "charger-reroute"
+seed: 864209751
+step_ms: 100
+max_ticks: 700
+world {
+  width_mm: 14000
+  height_mm: 10000
+  grid_cell_mm: 100
+  map_version: 1
+  regions {
+    id: "central-wall"
+    kind: REGION_KIND_OBSTACLE
+    minimum { x_mm: 6000 y_mm: 2100 }
+    maximum { x_mm: 7000 y_mm: 7900 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "north-pass"
+    kind: REGION_KIND_CHOKEPOINT
+    minimum { x_mm: 6000 y_mm: 0 }
+    maximum { x_mm: 7000 y_mm: 2000 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "south-pass"
+    kind: REGION_KIND_CHOKEPOINT
+    minimum { x_mm: 6000 y_mm: 8000 }
+    maximum { x_mm: 7000 y_mm: 10000 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "rough-south"
+    kind: REGION_KIND_TERRAIN
+    minimum { x_mm: 2000 y_mm: 7000 }
+    maximum { x_mm: 3000 y_mm: 8000 }
+    terrain: "ground"
+    energy_multiplier_permille: 1500
+  }
+  regions {
+    id: "restricted-northwest"
+    kind: REGION_KIND_RESTRICTED
+    minimum { x_mm: 0 y_mm: 3000 }
+    maximum { x_mm: 1000 y_mm: 5000 }
+    energy_multiplier_permille: 1000
+  }
+  locations {
+    id: "charger-left"
+    kind: LOCATION_KIND_CHARGING
+    position { x_mm: 2000 y_mm: 1000 }
+    radius_mm: 300
+    charge_mj_per_tick: 25000
+  }
+  locations {
+    id: "charger-right"
+    kind: LOCATION_KIND_CHARGING
+    position { x_mm: 12000 y_mm: 9000 }
+    radius_mm: 300
+    charge_mj_per_tick: 25000
+  }
+  locations {
+    id: "return-left"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 1000 y_mm: 1000 }
+    radius_mm: 300
+  }
+  locations {
+    id: "return-right"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 12000 y_mm: 9000 }
+    radius_mm: 300
+  }
+}
+vehicles {
+  id: "uav-alpha"
+  kind: "uav"
+  initial_position { x_mm: 1000 y_mm: 1000 }
+  max_speed_mm_s: 1000
+  initial_energy_mj: 200000
+  energy_cost_mj_per_meter: 1000
+  payload_grams: 1500
+  capabilities: CAPABILITY_SEARCH
+  capabilities: CAPABILITY_RELAY
+  terrain_access: "air"
+  return_location_id: "return-left"
+}
+vehicles {
+  id: "ugv-bravo"
+  kind: "ugv"
+  initial_position { x_mm: 1000 y_mm: 8000 }
+  max_speed_mm_s: 1000
+  initial_energy_mj: 350000
+  energy_cost_mj_per_meter: 1400
+  payload_grams: 5000
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "ground"
+  return_location_id: "return-left"
+}
+vehicles {
+  id: "uav-charlie"
+  kind: "uav"
+  initial_position { x_mm: 12000 y_mm: 8000 }
+  max_speed_mm_s: 1400
+  initial_energy_mj: 260000
+  energy_cost_mj_per_meter: 900
+  payload_grams: 2500
+  capabilities: CAPABILITY_RELAY
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "air"
+  return_location_id: "return-right"
+}
+tasks {
+  id: "search-far-east"
+  kind: "search"
+  target { x_mm: 12000 y_mm: 1000 }
+  required_capability: CAPABILITY_SEARCH
+  deadline_tick: 640
+  completion_radius_mm: 200
+  assigned_agent_id: "uav-alpha"
+  released: true
+  service_ticks: 8
+  service_energy_mj_per_tick: 700
+}
+tasks {
+  id: "inspect-west"
+  kind: "inspection"
+  target { x_mm: 4000 y_mm: 8000 }
+  required_capability: CAPABILITY_INSPECTION
+  deadline_tick: 500
+  completion_radius_mm: 200
+  assigned_agent_id: "ugv-bravo"
+  released: true
+  service_ticks: 6
+  service_energy_mj_per_tick: 700
+}
+tasks {
+  id: "relay-east"
+  kind: "relay"
+  target { x_mm: 10000 y_mm: 8000 }
+  required_capability: CAPABILITY_RELAY
+  deadline_tick: 500
+  completion_radius_mm: 200
+  assigned_agent_id: "uav-charlie"
+  released: true
+  service_ticks: 5
+  service_energy_mj_per_tick: 500
+}
+events {
+  id: "initial-low-energy"
+  tick: 0
+  kind: TAPE_EVENT_KIND_ENERGY_DELTA
+  target_id: "uav-alpha"
+  value_min: -198000
+  value_max: -198000
+  rng_stream: "environment"
+}
+events {
+  id: "close-north-pass"
+  tick: 20
+  kind: TAPE_EVENT_KIND_SET_REGION_CLOSED
+  target_id: "north-pass"
+  bool_value: true
+}
+network_profile: "nominal"
+allocation_policy: ALLOCATION_POLICY_SCRIPTED

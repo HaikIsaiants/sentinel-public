@@ -1,0 +1,230 @@
+schema_version: 1
+name: "connected-cbba"
+seed: 371905248
+step_ms: 100
+max_ticks: 900
+world {
+  width_mm: 12000
+  height_mm: 8000
+  grid_cell_mm: 100
+  map_version: 1
+  regions {
+    id: "air-search-zone"
+    kind: REGION_KIND_TERRAIN
+    minimum { x_mm: 2500 y_mm: 1000 }
+    maximum { x_mm: 3500 y_mm: 2000 }
+    terrain: "air"
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "central-wall"
+    kind: REGION_KIND_OBSTACLE
+    minimum { x_mm: 5500 y_mm: 2000 }
+    maximum { x_mm: 6500 y_mm: 6000 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "ground-southeast"
+    kind: REGION_KIND_TERRAIN
+    minimum { x_mm: 9000 y_mm: 6500 }
+    maximum { x_mm: 10000 y_mm: 7500 }
+    terrain: "ground"
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "ground-southwest"
+    kind: REGION_KIND_TERRAIN
+    minimum { x_mm: 2500 y_mm: 6500 }
+    maximum { x_mm: 3500 y_mm: 7500 }
+    terrain: "ground"
+    energy_multiplier_permille: 1000
+  }
+  locations {
+    id: "return-east"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 11000 y_mm: 6500 }
+    radius_mm: 300
+  }
+  locations {
+    id: "return-west"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 1000 y_mm: 6500 }
+    radius_mm: 300
+  }
+}
+vehicles {
+  id: "uav-alpha"
+  kind: "uav"
+  initial_position { x_mm: 1000 y_mm: 1500 }
+  max_speed_mm_s: 2000
+  initial_energy_mj: 450000
+  energy_cost_mj_per_meter: 900
+  payload_grams: 1800
+  capabilities: CAPABILITY_SEARCH
+  capabilities: CAPABILITY_RELAY
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "air"
+  return_location_id: "return-west"
+}
+vehicles {
+  id: "uav-bravo"
+  kind: "uav"
+  initial_position { x_mm: 11000 y_mm: 1500 }
+  max_speed_mm_s: 1800
+  initial_energy_mj: 430000
+  energy_cost_mj_per_meter: 950
+  payload_grams: 1000
+  capabilities: CAPABILITY_SEARCH
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_RELAY
+  terrain_access: "air"
+  return_location_id: "return-east"
+}
+vehicles {
+  id: "ugv-charlie"
+  kind: "ugv"
+  initial_position { x_mm: 1000 y_mm: 6500 }
+  max_speed_mm_s: 1200
+  initial_energy_mj: 600000
+  energy_cost_mj_per_meter: 1300
+  payload_grams: 6500
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "ground"
+  return_location_id: "return-west"
+}
+vehicles {
+  id: "ugv-delta"
+  kind: "ugv"
+  initial_position { x_mm: 11000 y_mm: 6500 }
+  max_speed_mm_s: 1400
+  initial_energy_mj: 620000
+  energy_cost_mj_per_meter: 1250
+  payload_grams: 5000
+  capabilities: CAPABILITY_SEARCH
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "ground"
+  return_location_id: "return-east"
+}
+tasks {
+  id: "delivery-central-south"
+  kind: "delivery"
+  target { x_mm: 6000 y_mm: 7000 }
+  required_capability: CAPABILITY_DELIVERY
+  payload_required_grams: 3000
+  deadline_tick: 850
+  completion_radius_mm: 200
+  released: true
+  service_ticks: 8
+  service_energy_mj_per_tick: 900
+  priority: 80
+}
+tasks {
+  id: "delivery-east-dynamic"
+  kind: "delivery"
+  target { x_mm: 10000 y_mm: 4000 }
+  required_capability: CAPABILITY_DELIVERY
+  payload_required_grams: 1500
+  deadline_tick: 860
+  completion_radius_mm: 200
+  released: false
+  service_ticks: 6
+  service_energy_mj_per_tick: 800
+  priority: 76
+}
+tasks {
+  id: "inspect-northeast"
+  kind: "inspection"
+  target { x_mm: 9000 y_mm: 3000 }
+  required_capability: CAPABILITY_INSPECTION
+  deadline_tick: 840
+  completion_radius_mm: 200
+  released: true
+  service_ticks: 7
+  service_energy_mj_per_tick: 650
+  priority: 55
+}
+tasks {
+  id: "inspect-southwest"
+  kind: "inspection"
+  target { x_mm: 3000 y_mm: 7000 }
+  required_capability: CAPABILITY_INSPECTION
+  deadline_tick: 820
+  completion_radius_mm: 200
+  released: true
+  service_ticks: 7
+  service_energy_mj_per_tick: 700
+  priority: 72
+}
+tasks {
+  id: "relay-central-north"
+  kind: "relay"
+  target { x_mm: 6000 y_mm: 1000 }
+  required_capability: CAPABILITY_RELAY
+  deadline_tick: 830
+  completion_radius_mm: 200
+  released: true
+  service_ticks: 8
+  service_energy_mj_per_tick: 600
+  priority: 88
+}
+tasks {
+  id: "relay-west-dynamic"
+  kind: "relay"
+  target { x_mm: 2500 y_mm: 3500 }
+  required_capability: CAPABILITY_RELAY
+  deadline_tick: 870
+  completion_radius_mm: 200
+  released: false
+  service_ticks: 6
+  service_energy_mj_per_tick: 550
+  priority: 96
+}
+tasks {
+  id: "search-northwest"
+  kind: "search"
+  target { x_mm: 3000 y_mm: 1500 }
+  required_capability: CAPABILITY_SEARCH
+  deadline_tick: 810
+  completion_radius_mm: 200
+  released: true
+  service_ticks: 6
+  service_energy_mj_per_tick: 500
+  priority: 84
+}
+tasks {
+  id: "search-southeast"
+  kind: "search"
+  target { x_mm: 9500 y_mm: 7000 }
+  required_capability: CAPABILITY_SEARCH
+  deadline_tick: 850
+  completion_radius_mm: 200
+  released: true
+  service_ticks: 6
+  service_energy_mj_per_tick: 550
+  priority: 68
+}
+events {
+  id: "release-relay-west"
+  tick: 90
+  kind: TAPE_EVENT_KIND_RELEASE_TASK
+  target_id: "relay-west-dynamic"
+}
+events {
+  id: "release-delivery-east"
+  tick: 130
+  kind: TAPE_EVENT_KIND_RELEASE_TASK
+  target_id: "delivery-east-dynamic"
+}
+network_profile: "connected"
+allocation_policy: ALLOCATION_POLICY_SENTINEL_CBBA
+network_profiles {
+  id: "connected"
+  latency_ticks: 1
+  jitter_ticks: 0
+  packet_loss_permyriad: 0
+  bandwidth_bytes_per_tick: 8192
+  reorder_permyriad: 0
+  reorder_window_ticks: 0
+}

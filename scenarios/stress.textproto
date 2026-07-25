@@ -1,0 +1,154 @@
+schema_version: 1
+name: "deterministic-stress-mission"
+seed: 712367821
+step_ms: 100
+max_ticks: 100
+world {
+  width_mm: 12000
+  height_mm: 9000
+  regions {
+    id: "mud-lane"
+    kind: REGION_KIND_TERRAIN
+    minimum { x_mm: 2500 y_mm: 3000 }
+    maximum { x_mm: 3500 y_mm: 5000 }
+    terrain: "ground"
+    energy_multiplier_permille: 1500
+  }
+  regions {
+    id: "restricted-northwest"
+    kind: REGION_KIND_RESTRICTED
+    minimum { x_mm: 500 y_mm: 7000 }
+    maximum { x_mm: 1500 y_mm: 8000 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "obstacle-east"
+    kind: REGION_KIND_OBSTACLE
+    minimum { x_mm: 10000 y_mm: 1000 }
+    maximum { x_mm: 11000 y_mm: 2000 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "central-chokepoint"
+    kind: REGION_KIND_CHOKEPOINT
+    minimum { x_mm: 6000 y_mm: 3000 }
+    maximum { x_mm: 6500 y_mm: 3500 }
+    energy_multiplier_permille: 1000
+  }
+}
+vehicles {
+  id: "uav-alpha"
+  kind: "uav"
+  initial_position { x_mm: 1000 y_mm: 1000 }
+  max_speed_mm_s: 2000
+  initial_energy_mj: 1000000
+  energy_cost_mj_per_meter: 1000
+  payload_grams: 1000
+  capabilities: CAPABILITY_SEARCH
+  capabilities: CAPABILITY_RELAY
+  terrain_access: "air"
+}
+vehicles {
+  id: "ugv-bravo"
+  kind: "ugv"
+  initial_position { x_mm: 1000 y_mm: 4000 }
+  max_speed_mm_s: 1000
+  initial_energy_mj: 1500000
+  energy_cost_mj_per_meter: 1500
+  payload_grams: 5000
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "ground"
+}
+vehicles {
+  id: "uav-charlie"
+  kind: "uav"
+  initial_position { x_mm: 8000 y_mm: 1000 }
+  max_speed_mm_s: 2500
+  initial_energy_mj: 1200000
+  energy_cost_mj_per_meter: 1100
+  payload_grams: 2000
+  capabilities: CAPABILITY_RELAY
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "air"
+}
+vehicles {
+  id: "ugv-delta"
+  kind: "ugv"
+  initial_position { x_mm: 9000 y_mm: 7000 }
+  max_speed_mm_s: 1000
+  initial_energy_mj: 1400000
+  energy_cost_mj_per_meter: 1400
+  payload_grams: 7000
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "ground"
+}
+tasks {
+  id: "search-sector-a"
+  kind: "search"
+  target { x_mm: 5000 y_mm: 1000 }
+  required_capability: CAPABILITY_SEARCH
+  deadline_tick: 80
+  completion_radius_mm: 50
+  assigned_agent_id: "uav-alpha"
+  released: true
+}
+tasks {
+  id: "inspect-site-b"
+  kind: "inspection"
+  target { x_mm: 4000 y_mm: 4000 }
+  required_capability: CAPABILITY_INSPECTION
+  deadline_tick: 80
+  completion_radius_mm: 50
+  assigned_agent_id: "ugv-bravo"
+  released: true
+}
+tasks {
+  id: "relay-point-c"
+  kind: "relay"
+  target { x_mm: 8000 y_mm: 4000 }
+  required_capability: CAPABILITY_RELAY
+  deadline_tick: 80
+  completion_radius_mm: 50
+  assigned_agent_id: "uav-charlie"
+}
+tasks {
+  id: "delivery-site-d"
+  kind: "delivery"
+  target { x_mm: 9000 y_mm: 6000 }
+  required_capability: CAPABILITY_DELIVERY
+  payload_required_grams: 4000
+  deadline_tick: 80
+  completion_radius_mm: 50
+  assigned_agent_id: "ugv-delta"
+  released: true
+}
+events {
+  id: "network-profile-1"
+  tick: 2
+  kind: TAPE_EVENT_KIND_SET_NETWORK_PROFILE
+  text_value: "latency_jitter"
+}
+events {
+  id: "energy-jitter-1"
+  tick: 3
+  kind: TAPE_EVENT_KIND_ENERGY_DELTA
+  target_id: "ugv-bravo"
+  value_min: -1000
+  value_max: -500
+  rng_stream: "environment"
+}
+events {
+  id: "release-relay-1"
+  tick: 5
+  kind: TAPE_EVENT_KIND_RELEASE_TASK
+  target_id: "relay-point-c"
+}
+events {
+  id: "disable-ugv-delta-1"
+  tick: 12
+  kind: TAPE_EVENT_KIND_DISABLE_VEHICLE
+  target_id: "ugv-delta"
+}
+network_profile: "nominal"

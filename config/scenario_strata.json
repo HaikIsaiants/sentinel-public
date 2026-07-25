@@ -1,0 +1,453 @@
+{
+  "benchmark_version": 1,
+  "benchmark_id": "sentinel-v1",
+  "mission": {
+    "tick_seconds": 0.1,
+    "horizon_seconds": 600.0,
+    "agent_count": [
+      3,
+      5
+    ],
+    "initial_task_count": [
+      12,
+      18
+    ],
+    "minimum_each_task_type": 2,
+    "world": {
+      "width_meters": 160,
+      "height_meters": 120,
+      "grid_cell_meters": 1,
+      "obstacle_fraction": [
+        0.08,
+        0.16
+      ],
+      "restricted_fraction": [
+        0.03,
+        0.08
+      ],
+      "terrain_region_count": [
+        5,
+        10
+      ],
+      "chokepoint_count": [
+        2,
+        4
+      ],
+      "charging_or_return_location_count": [
+        2,
+        3
+      ]
+    }
+  },
+  "network_profiles": {
+    "nominal": {
+      "latency_ms": [
+        10,
+        40
+      ],
+      "jitter_ms": [
+        0,
+        5
+      ],
+      "packet_loss_probability": [
+        0.0,
+        0.01
+      ],
+      "bandwidth_bytes_per_second": [
+        500000,
+        1000000
+      ],
+      "reorder_probability": [
+        0.0,
+        0.0
+      ],
+      "reorder_window_messages": [
+        1,
+        1
+      ]
+    },
+    "latency_jitter": {
+      "latency_ms": [
+        150,
+        500
+      ],
+      "jitter_ms": [
+        50,
+        200
+      ],
+      "packet_loss_probability": [
+        0.0,
+        0.02
+      ],
+      "bandwidth_bytes_per_second": [
+        100000,
+        250000
+      ],
+      "reorder_probability": [
+        0.0,
+        0.05
+      ],
+      "reorder_window_messages": [
+        2,
+        4
+      ]
+    },
+    "packet_loss_reordering": {
+      "latency_ms": [
+        30,
+        100
+      ],
+      "jitter_ms": [
+        5,
+        30
+      ],
+      "packet_loss_probability": [
+        0.1,
+        0.25
+      ],
+      "bandwidth_bytes_per_second": [
+        100000,
+        250000
+      ],
+      "reorder_probability": [
+        0.1,
+        0.3
+      ],
+      "reorder_window_messages": [
+        3,
+        8
+      ]
+    },
+    "bandwidth_limited": {
+      "latency_ms": [
+        50,
+        150
+      ],
+      "jitter_ms": [
+        10,
+        50
+      ],
+      "packet_loss_probability": [
+        0.02,
+        0.08
+      ],
+      "bandwidth_bytes_per_second": [
+        4096,
+        16384
+      ],
+      "reorder_probability": [
+        0.02,
+        0.1
+      ],
+      "reorder_window_messages": [
+        2,
+        5
+      ]
+    },
+    "combined_communications": {
+      "latency_ms": [
+        200,
+        600
+      ],
+      "jitter_ms": [
+        80,
+        250
+      ],
+      "packet_loss_probability": [
+        0.12,
+        0.28
+      ],
+      "bandwidth_bytes_per_second": [
+        8192,
+        32768
+      ],
+      "reorder_probability": [
+        0.12,
+        0.3
+      ],
+      "reorder_window_messages": [
+        4,
+        10
+      ]
+    },
+    "compound": {
+      "latency_ms": [
+        100,
+        300
+      ],
+      "jitter_ms": [
+        30,
+        120
+      ],
+      "packet_loss_probability": [
+        0.05,
+        0.15
+      ],
+      "bandwidth_bytes_per_second": [
+        16384,
+        65536
+      ],
+      "reorder_probability": [
+        0.05,
+        0.15
+      ],
+      "reorder_window_messages": [
+        3,
+        6
+      ]
+    }
+  },
+  "event_profiles": {
+    "none": {
+      "partitions": [],
+      "route_blockages": [],
+      "task_arrivals": [],
+      "agent_failures": []
+    },
+    "temporary_partition": {
+      "partitions": [
+        {
+          "count": [
+            1,
+            2
+          ],
+          "start_seconds": [
+            90,
+            360
+          ],
+          "duration_seconds": [
+            20,
+            90
+          ]
+        }
+      ],
+      "route_blockages": [],
+      "task_arrivals": [],
+      "agent_failures": []
+    },
+    "blocked_route": {
+      "partitions": [],
+      "route_blockages": [
+        {
+          "count": [
+            1,
+            2
+          ],
+          "start_seconds": [
+            120,
+            360
+          ],
+          "duration_seconds": [
+            120,
+            480
+          ]
+        }
+      ],
+      "task_arrivals": [],
+      "agent_failures": []
+    },
+    "dynamic_task_arrival": {
+      "partitions": [],
+      "route_blockages": [],
+      "task_arrivals": [
+        {
+          "count": [
+            2,
+            4
+          ],
+          "start_seconds": [
+            90,
+            420
+          ],
+          "minimum_spacing_seconds": 20,
+          "priority": [
+            65,
+            100
+          ],
+          "task_type": "uniform"
+        }
+      ],
+      "agent_failures": []
+    },
+    "agent_loss_degradation": {
+      "partitions": [],
+      "route_blockages": [],
+      "task_arrivals": [],
+      "agent_failures": [
+        {
+          "count": [
+            1,
+            1
+          ],
+          "start_seconds": [
+            180,
+            360
+          ],
+          "types": [
+            {
+              "type": "removal",
+              "weight": 0.5
+            },
+            {
+              "type": "speed_degradation",
+              "weight": 0.25,
+              "multiplier": [
+                0.35,
+                0.65
+              ]
+            },
+            {
+              "type": "endurance_degradation",
+              "weight": 0.25,
+              "multiplier": [
+                0.4,
+                0.7
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "compound_disruption": {
+      "partitions": [
+        {
+          "count": [
+            1,
+            1
+          ],
+          "start_seconds": [
+            90,
+            120
+          ],
+          "duration_seconds": [
+            180,
+            210
+          ]
+        }
+      ],
+      "route_blockages": [
+        {
+          "count": [
+            1,
+            1
+          ],
+          "start_seconds": [
+            130,
+            160
+          ],
+          "duration_seconds": [
+            300,
+            470
+          ]
+        }
+      ],
+      "task_arrivals": [
+        {
+          "count": [
+            1,
+            1
+          ],
+          "start_seconds": [
+            230,
+            260
+          ],
+          "priority": [
+            90,
+            100
+          ],
+          "task_type": "uniform"
+        }
+      ],
+      "agent_failures": [
+        {
+          "count": [
+            1,
+            1
+          ],
+          "start_seconds": [
+            190,
+            220
+          ],
+          "types": [
+            {
+              "type": "removal",
+              "weight": 1.0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "strata": [
+    {
+      "id": "nominal",
+      "weight": 0.1,
+      "network_profile": "nominal",
+      "event_profile": "none",
+      "degraded_communications": false
+    },
+    {
+      "id": "latency_jitter",
+      "weight": 0.1,
+      "network_profile": "latency_jitter",
+      "event_profile": "none",
+      "degraded_communications": true
+    },
+    {
+      "id": "packet_loss_reordering",
+      "weight": 0.1,
+      "network_profile": "packet_loss_reordering",
+      "event_profile": "none",
+      "degraded_communications": true
+    },
+    {
+      "id": "bandwidth_limited",
+      "weight": 0.1,
+      "network_profile": "bandwidth_limited",
+      "event_profile": "none",
+      "degraded_communications": true
+    },
+    {
+      "id": "temporary_partition",
+      "weight": 0.1,
+      "network_profile": "nominal",
+      "event_profile": "temporary_partition",
+      "degraded_communications": true
+    },
+    {
+      "id": "blocked_route",
+      "weight": 0.1,
+      "network_profile": "nominal",
+      "event_profile": "blocked_route",
+      "degraded_communications": false
+    },
+    {
+      "id": "dynamic_task_arrival",
+      "weight": 0.1,
+      "network_profile": "nominal",
+      "event_profile": "dynamic_task_arrival",
+      "degraded_communications": false
+    },
+    {
+      "id": "agent_loss_degradation",
+      "weight": 0.1,
+      "network_profile": "nominal",
+      "event_profile": "agent_loss_degradation",
+      "degraded_communications": false
+    },
+    {
+      "id": "combined_communications",
+      "weight": 0.1,
+      "network_profile": "combined_communications",
+      "event_profile": "none",
+      "degraded_communications": true
+    },
+    {
+      "id": "compound_disruption",
+      "weight": 0.1,
+      "network_profile": "compound",
+      "event_profile": "compound_disruption",
+      "degraded_communications": true
+    }
+  ]
+}

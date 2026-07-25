@@ -1,0 +1,171 @@
+schema_version: 1
+name: "basic-mission"
+seed: 294817563
+step_ms: 100
+max_ticks: 320
+world {
+  width_mm: 14000
+  height_mm: 10000
+  grid_cell_mm: 100
+  map_version: 1
+  regions {
+    id: "barrier-lower"
+    kind: REGION_KIND_OBSTACLE
+    minimum { x_mm: 6000 y_mm: 0 }
+    maximum { x_mm: 7000 y_mm: 3900 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "barrier-upper"
+    kind: REGION_KIND_OBSTACLE
+    minimum { x_mm: 6000 y_mm: 6100 }
+    maximum { x_mm: 7000 y_mm: 10000 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "central-pass"
+    kind: REGION_KIND_CHOKEPOINT
+    minimum { x_mm: 6000 y_mm: 4000 }
+    maximum { x_mm: 7000 y_mm: 6000 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "ground-slope"
+    kind: REGION_KIND_TERRAIN
+    minimum { x_mm: 2000 y_mm: 7000 }
+    maximum { x_mm: 3000 y_mm: 9000 }
+    terrain: "ground"
+    energy_multiplier_permille: 1400
+  }
+  regions {
+    id: "restricted-southwest"
+    kind: REGION_KIND_RESTRICTED
+    minimum { x_mm: 0 y_mm: 9000 }
+    maximum { x_mm: 1000 y_mm: 10000 }
+    energy_multiplier_permille: 1000
+  }
+  locations {
+    id: "charger-left"
+    kind: LOCATION_KIND_CHARGING
+    position { x_mm: 1000 y_mm: 8000 }
+    radius_mm: 300
+    charge_mj_per_tick: 20000
+  }
+  locations {
+    id: "charger-right"
+    kind: LOCATION_KIND_CHARGING
+    position { x_mm: 12000 y_mm: 8000 }
+    radius_mm: 300
+    charge_mj_per_tick: 20000
+  }
+  locations {
+    id: "return-left"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 1000 y_mm: 7000 }
+    radius_mm: 300
+  }
+  locations {
+    id: "return-right"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 12000 y_mm: 7000 }
+    radius_mm: 300
+  }
+}
+vehicles {
+  id: "uav-alpha"
+  kind: "uav"
+  initial_position { x_mm: 1000 y_mm: 5000 }
+  max_speed_mm_s: 2000
+  initial_energy_mj: 300000
+  energy_cost_mj_per_meter: 900
+  payload_grams: 1000
+  capabilities: CAPABILITY_SEARCH
+  terrain_access: "air"
+  return_location_id: "return-left"
+}
+vehicles {
+  id: "ugv-bravo"
+  kind: "ugv"
+  initial_position { x_mm: 1000 y_mm: 8000 }
+  max_speed_mm_s: 1000
+  initial_energy_mj: 420000
+  energy_cost_mj_per_meter: 1400
+  payload_grams: 5000
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "ground"
+  return_location_id: "return-left"
+}
+vehicles {
+  id: "uav-charlie"
+  kind: "uav"
+  initial_position { x_mm: 12000 y_mm: 2000 }
+  max_speed_mm_s: 1800
+  initial_energy_mj: 280000
+  energy_cost_mj_per_meter: 1000
+  payload_grams: 2000
+  capabilities: CAPABILITY_RELAY
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "air"
+  return_location_id: "return-right"
+}
+vehicles {
+  id: "ugv-delta"
+  kind: "ugv"
+  initial_position { x_mm: 12000 y_mm: 8000 }
+  max_speed_mm_s: 1200
+  initial_energy_mj: 500000
+  energy_cost_mj_per_meter: 1600
+  payload_grams: 7000
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "ground"
+  return_location_id: "return-right"
+}
+tasks {
+  id: "search-east"
+  kind: "search"
+  target { x_mm: 10000 y_mm: 5000 }
+  required_capability: CAPABILITY_SEARCH
+  deadline_tick: 260
+  completion_radius_mm: 200
+  released: true
+  service_ticks: 5
+  service_energy_mj_per_tick: 500
+}
+tasks {
+  id: "inspect-west"
+  kind: "inspection"
+  target { x_mm: 4000 y_mm: 8000 }
+  required_capability: CAPABILITY_INSPECTION
+  deadline_tick: 260
+  completion_radius_mm: 200
+  released: true
+  service_ticks: 6
+  service_energy_mj_per_tick: 700
+}
+tasks {
+  id: "relay-west"
+  kind: "relay"
+  target { x_mm: 4000 y_mm: 2000 }
+  required_capability: CAPABILITY_RELAY
+  deadline_tick: 280
+  completion_radius_mm: 200
+  released: true
+  service_ticks: 8
+  service_energy_mj_per_tick: 600
+}
+tasks {
+  id: "delivery-east"
+  kind: "delivery"
+  target { x_mm: 9000 y_mm: 8000 }
+  required_capability: CAPABILITY_DELIVERY
+  payload_required_grams: 4000
+  deadline_tick: 260
+  completion_radius_mm: 200
+  released: true
+  service_ticks: 7
+  service_energy_mj_per_tick: 900
+}
+network_profile: "nominal"
+allocation_policy: ALLOCATION_POLICY_NEAREST_CAPABLE

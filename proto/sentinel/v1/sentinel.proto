@@ -1,0 +1,491 @@
+syntax = "proto3";
+
+package sentinel.v1;
+
+enum Capability {
+  CAPABILITY_UNSPECIFIED = 0;
+  CAPABILITY_SEARCH = 1;
+  CAPABILITY_INSPECTION = 2;
+  CAPABILITY_RELAY = 3;
+  CAPABILITY_DELIVERY = 4;
+}
+
+enum RegionKind {
+  REGION_KIND_UNSPECIFIED = 0;
+  REGION_KIND_OBSTACLE = 1;
+  REGION_KIND_RESTRICTED = 2;
+  REGION_KIND_TERRAIN = 3;
+  REGION_KIND_CHOKEPOINT = 4;
+}
+
+enum TapeEventKind {
+  TAPE_EVENT_KIND_UNSPECIFIED = 0;
+  TAPE_EVENT_KIND_RELEASE_TASK = 1;
+  TAPE_EVENT_KIND_DISABLE_VEHICLE = 2;
+  TAPE_EVENT_KIND_ENERGY_DELTA = 3;
+  TAPE_EVENT_KIND_SET_NETWORK_PROFILE = 4;
+  TAPE_EVENT_KIND_SET_REGION_CLOSED = 5;
+  TAPE_EVENT_KIND_SET_LINK_BLOCKED = 6;
+  TAPE_EVENT_KIND_SET_SPEED_PERMILLE = 7;
+  TAPE_EVENT_KIND_SET_ENDURANCE_PERMILLE = 8;
+}
+
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_PENDING = 1;
+  TASK_STATUS_COMPLETED = 2;
+  TASK_STATUS_MISSED = 3;
+}
+
+enum LocationKind {
+  LOCATION_KIND_UNSPECIFIED = 0;
+  LOCATION_KIND_CHARGING = 1;
+  LOCATION_KIND_RETURN = 2;
+}
+
+enum AllocationPolicy {
+  ALLOCATION_POLICY_UNSPECIFIED = 0;
+  ALLOCATION_POLICY_SCRIPTED = 1;
+  ALLOCATION_POLICY_NEAREST_CAPABLE = 2;
+  ALLOCATION_POLICY_SENTINEL_CBBA = 3;
+}
+
+enum NetworkDisposition {
+  NETWORK_DISPOSITION_UNSPECIFIED = 0;
+  NETWORK_DISPOSITION_QUEUED = 1;
+  NETWORK_DISPOSITION_DROPPED_LOSS = 2;
+  NETWORK_DISPOSITION_DROPPED_PARTITION = 3;
+  NETWORK_DISPOSITION_DELIVERED = 4;
+}
+
+enum TaskReportKind {
+  TASK_REPORT_KIND_UNSPECIFIED = 0;
+  TASK_REPORT_KIND_WORKING = 1;
+  TASK_REPORT_KIND_REJECTED = 2;
+}
+
+enum BehaviorMode {
+  BEHAVIOR_MODE_UNSPECIFIED = 0;
+  BEHAVIOR_MODE_IDLE = 1;
+  BEHAVIOR_MODE_WAITING = 2;
+  BEHAVIOR_MODE_NAVIGATING = 3;
+  BEHAVIOR_MODE_EXECUTING = 4;
+  BEHAVIOR_MODE_CHARGING = 5;
+  BEHAVIOR_MODE_RETURNING = 6;
+}
+
+enum ReplanReason {
+  REPLAN_REASON_UNSPECIFIED = 0;
+  REPLAN_REASON_BLOCKAGE = 1;
+  REPLAN_REASON_RESERVATION = 2;
+  REPLAN_REASON_ENDURANCE = 3;
+  REPLAN_REASON_TASK = 4;
+  REPLAN_REASON_OWNER = 5;
+}
+
+message Point {
+  sint64 x_mm = 1;
+  sint64 y_mm = 2;
+}
+
+message Region {
+  string id = 1;
+  RegionKind kind = 2;
+  Point minimum = 3;
+  Point maximum = 4;
+  string terrain = 5;
+  uint32 energy_multiplier_permille = 6;
+  bool closed = 7;
+}
+
+message ServiceLocation {
+  string id = 1;
+  LocationKind kind = 2;
+  Point position = 3;
+  sint64 radius_mm = 4;
+  sint64 charge_mj_per_tick = 5;
+}
+
+message World {
+  sint64 width_mm = 1;
+  sint64 height_mm = 2;
+  repeated Region regions = 3;
+  sint64 grid_cell_mm = 4;
+  uint64 map_version = 5;
+  repeated ServiceLocation locations = 6;
+}
+
+message NetworkProfile {
+  string id = 1;
+  uint64 latency_ticks = 2;
+  uint64 jitter_ticks = 3;
+  uint32 packet_loss_permyriad = 4;
+  uint64 bandwidth_bytes_per_tick = 5;
+  uint32 reorder_permyriad = 6;
+  uint32 reorder_window_ticks = 7;
+}
+
+message VehicleSpec {
+  string id = 1;
+  string kind = 2;
+  Point initial_position = 3;
+  sint64 max_speed_mm_s = 4;
+  sint64 initial_energy_mj = 5;
+  sint64 energy_cost_mj_per_meter = 6;
+  sint64 payload_grams = 7;
+  repeated Capability capabilities = 8;
+  repeated string terrain_access = 9;
+  string return_location_id = 10;
+}
+
+message TaskSpec {
+  string id = 1;
+  string kind = 2;
+  Point target = 3;
+  Capability required_capability = 4;
+  sint64 payload_required_grams = 5;
+  uint64 deadline_tick = 6;
+  sint64 completion_radius_mm = 7;
+  string assigned_agent_id = 8;
+  bool released = 9;
+  uint64 service_ticks = 10;
+  sint64 service_energy_mj_per_tick = 11;
+  uint32 priority = 12;
+}
+
+message TapeEvent {
+  string id = 1;
+  uint64 tick = 2;
+  TapeEventKind kind = 3;
+  string target_id = 4;
+  sint64 value_min = 5;
+  sint64 value_max = 6;
+  string rng_stream = 7;
+  string text_value = 8;
+  bool bool_value = 9;
+}
+
+message Scenario {
+  uint32 schema_version = 1;
+  string name = 2;
+  uint64 seed = 3;
+  uint64 step_ms = 4;
+  uint64 max_ticks = 5;
+  World world = 6;
+  repeated VehicleSpec vehicles = 7;
+  repeated TaskSpec tasks = 8;
+  repeated TapeEvent events = 9;
+  string network_profile = 10;
+  AllocationPolicy allocation_policy = 11;
+  repeated NetworkProfile network_profiles = 12;
+  uint64 failure_detection_ticks = 13;
+}
+
+message VehicleState {
+  string id = 1;
+  string kind = 2;
+  Point position = 3;
+  sint64 velocity_x_mm_s = 4;
+  sint64 velocity_y_mm_s = 5;
+  sint64 max_speed_mm_s = 6;
+  sint64 energy_mj = 7;
+  sint64 payload_grams = 8;
+  repeated Capability capabilities = 9;
+  repeated string terrain_access = 10;
+  bool active = 11;
+  sint64 initial_energy_mj = 12;
+  sint64 energy_cost_mj_per_meter = 13;
+  string return_location_id = 14;
+  sint64 energy_capacity_mj = 15;
+}
+
+message TaskState {
+  string id = 1;
+  string kind = 2;
+  Point target = 3;
+  Capability required_capability = 4;
+  sint64 payload_required_grams = 5;
+  uint64 deadline_tick = 6;
+  sint64 completion_radius_mm = 7;
+  string assigned_agent_id = 8;
+  TaskStatus status = 9;
+  uint64 service_ticks = 10;
+  sint64 service_energy_mj_per_tick = 11;
+  uint64 progress_ticks = 12;
+  uint64 allocation_epoch = 13;
+  uint64 allocation_version = 14;
+  uint32 priority = 15;
+  sint64 allocation_score = 16;
+  uint32 bundle_position = 17;
+}
+
+message AllocationClaim {
+  uint64 epoch = 1;
+  uint64 version = 2;
+  string task_id = 3;
+  string agent_id = 4;
+  bool feasible = 5;
+  sint64 distance_mm = 6;
+}
+
+message AllocationCommit {
+  uint64 epoch = 1;
+  uint64 version = 2;
+  string task_id = 3;
+  string agent_id = 4;
+  sint64 distance_mm = 5;
+  sint64 score = 6;
+  uint32 bundle_position = 7;
+}
+
+message AllocationBid {
+  uint64 epoch = 1;
+  uint64 version = 2;
+  string task_id = 3;
+  string bidder_id = 4;
+  sint64 score = 5;
+  sint64 distance_mm = 6;
+  sint64 energy_mj = 7;
+  uint64 completion_tick = 8;
+  uint32 bundle_position = 9;
+}
+
+message AllocationRelay {
+  AllocationBid bid = 1;
+  repeated string path_agent_ids = 2;
+}
+
+message AllocationState {
+  uint64 epoch = 1;
+  uint64 version = 2;
+  string sender_id = 3;
+  repeated AllocationBid bids = 4;
+  repeated AllocationBid winners = 5;
+  repeated string bundle_task_ids = 6;
+  uint64 map_version = 7;
+  repeated AllocationCommit owners = 8;
+  repeated AllocationRelay winner_relays = 9;
+}
+
+message TaskReport {
+  string task_id = 1;
+  TaskReportKind kind = 2;
+}
+
+message NetworkMessage {
+  string sender_id = 1;
+  string recipient_id = 2;
+  uint64 version = 3;
+  bytes payload = 4;
+}
+
+message NetworkOutcome {
+  uint64 sequence = 1;
+  NetworkDisposition disposition = 2;
+  uint64 tick = 3;
+  NetworkMessage message = 4;
+  uint64 serialized_bytes = 5;
+  uint64 enqueue_tick = 6;
+  uint64 transmit_start_tick = 7;
+  uint64 transmit_end_tick = 8;
+  uint64 delivery_tick = 9;
+  sint64 jitter_ticks = 10;
+  bool reordered = 11;
+  string profile_id = 12;
+}
+
+message AllocationConvergence {
+  uint64 epoch = 1;
+  uint64 start_tick = 2;
+  uint64 end_tick = 3;
+  bool complete = 4;
+}
+
+message SpaceTimeReservation {
+  // Both endpoint ticks belong to the reservation window.
+  string resource_id = 1;
+  string agent_id = 2;
+  uint64 start_tick = 3;
+  uint64 end_tick = 4;
+  uint64 version = 5;
+  uint64 route_version = 6;
+  uint64 map_version = 7;
+}
+
+message FailureDetection {
+  string failed_agent_id = 1;
+  string detector_agent_id = 2;
+  uint64 failure_tick = 3;
+  uint64 detection_tick = 4;
+}
+
+message TaskReassignment {
+  string task_id = 1;
+  string failed_agent_id = 2;
+  string detector_agent_id = 3;
+  uint64 failure_tick = 4;
+  uint64 detection_tick = 5;
+  uint64 previous_epoch = 6;
+  uint64 previous_version = 7;
+  string new_agent_id = 8;
+  uint64 new_epoch = 9;
+  uint64 new_version = 10;
+  uint64 commit_tick = 11;
+  bool complete = 12;
+}
+
+message ReplanningSample {
+  string agent_id = 1;
+  ReplanReason reason = 2;
+  uint64 start_tick = 3;
+  uint64 end_tick = 4;
+  bool wait_plan = 5;
+  bool complete = 6;
+}
+
+message RoutePlan {
+  uint64 version = 1;
+  uint64 map_version = 2;
+  string goal = 3;
+  repeated Point waypoints = 4;
+}
+
+message AgentObservation {
+  uint64 tick = 1;
+  uint64 step_ms = 2;
+  VehicleState self = 3;
+  repeated TaskState assigned_tasks = 4;
+  repeated NetworkMessage delivered_messages = 5;
+  World world = 6;
+  repeated TaskState available_tasks = 7;
+  repeated string peer_ids = 8;
+  uint64 allocation_epoch = 9;
+  AllocationPolicy allocation_policy = 10;
+  repeated TaskState known_tasks = 11;
+  string network_profile = 12;
+  repeated FailureDetection failure_detections = 13;
+  repeated SpaceTimeReservation committed_reservations = 14;
+  repeated string reachable_peer_ids = 15;
+}
+
+message AgentAction {
+  uint64 tick = 1;
+  sint64 velocity_x_mm_s = 2;
+  sint64 velocity_y_mm_s = 3;
+  repeated NetworkMessage outgoing_messages = 4;
+  repeated AllocationCommit allocation_commits = 5;
+  repeated TaskReport task_reports = 6;
+  string charge_location_id = 7;
+  BehaviorMode behavior_mode = 8;
+  uint64 route_version = 9;
+  bool replanned = 10;
+  AllocationState allocation_state = 11;
+  repeated FailureDetection failure_detections = 12;
+  repeated SpaceTimeReservation reservation_proposals = 13;
+  repeated ReplanningSample replanning_samples = 14;
+  RoutePlan route_plan = 15;
+}
+
+message Envelope {
+  uint32 schema_version = 1;
+  uint64 sequence = 2;
+  uint64 simulation_time_ms = 3;
+  string sender_id = 4;
+  string recipient_id = 5;
+  oneof body {
+    AgentObservation observation = 10;
+    AgentAction action = 11;
+    NetworkMessage message = 12;
+  }
+}
+
+message ActionBatch {
+  uint64 tick = 1;
+  repeated Envelope actions = 2;
+}
+
+message SimulationSummary {
+  bool success = 1;
+  uint64 ticks = 2;
+  string terminal_hash = 3;
+  repeated string tick_hashes = 4;
+  uint32 completed_tasks = 5;
+  uint32 total_tasks = 6;
+  uint32 active_agents = 7;
+  uint64 wait_ticks = 8;
+  uint64 replan_count = 9;
+  uint64 recharge_ticks = 10;
+  uint64 return_ticks = 11;
+  uint64 route_conflicts = 12;
+  uint64 travel_distance_mm = 13;
+  uint64 energy_consumed_mj = 14;
+  uint64 rejected_commits = 15;
+  uint64 communication_bytes = 16;
+  uint64 communication_messages = 17;
+  uint64 delivered_messages = 18;
+  uint64 dropped_messages = 19;
+  uint64 reordered_messages = 20;
+  repeated AllocationConvergence allocation_convergence = 21;
+  repeated FailureDetection failure_detections = 22;
+  repeated TaskReassignment task_reassignments = 23;
+  repeated ReplanningSample replanning_samples = 24;
+  uint64 maximum_reassignment_delay_ms = 25;
+  uint32 missing_reassignments = 26;
+  bool agent_energy_never_drops_below_zero = 27;
+  uint64 agent_energy_below_zero_violations = 28;
+  bool committed_reservations_never_overlap = 29;
+  uint64 committed_reservation_overlap_violations = 30;
+  bool completed_tasks_are_never_reassigned = 31;
+  uint64 completed_task_reassignment_violations = 32;
+  bool incapable_agents_never_commit_tasks = 33;
+  uint64 incapable_agent_commit_violations = 34;
+}
+
+message ObservationBatch {
+  uint64 tick = 1;
+  repeated Envelope observations = 2;
+  bool finished = 3;
+  SimulationSummary summary = 4;
+}
+
+message SimulationFrame {
+  oneof body {
+    ObservationBatch observations = 1;
+    ActionBatch actions = 2;
+  }
+}
+
+message AppliedEvent {
+  TapeEvent source = 1;
+  sint64 resolved_value = 2;
+  string rng_stream = 3;
+  uint64 rng_state_after = 4;
+}
+
+message EventRecord {
+  uint64 sequence = 1;
+  uint64 tick = 2;
+  ActionBatch actions = 3;
+  repeated AppliedEvent applied_events = 4;
+  string state_hash = 5;
+  repeated NetworkOutcome network_outcomes = 6;
+}
+
+message EventLogHeader {
+  uint32 schema_version = 1;
+  string scenario_name = 2;
+  uint64 scenario_seed = 3;
+  string scenario_hash = 4;
+}
+
+message EventLogFooter {
+  SimulationSummary summary = 1;
+}
+
+message EventLogEntry {
+  oneof body {
+    EventLogHeader header = 1;
+    EventRecord record = 2;
+    EventLogFooter footer = 3;
+  }
+}

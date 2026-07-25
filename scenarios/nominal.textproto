@@ -1,0 +1,91 @@
+schema_version: 1
+name: "nominal-scripted-mission"
+seed: 110382719
+step_ms: 100
+max_ticks: 100
+world {
+  width_mm: 10000
+  height_mm: 8000
+  regions {
+    id: "ground-lane"
+    kind: REGION_KIND_TERRAIN
+    minimum { x_mm: 2500 y_mm: 3000 }
+    maximum { x_mm: 3500 y_mm: 5000 }
+    terrain: "ground"
+    energy_multiplier_permille: 1250
+  }
+  regions {
+    id: "restricted-northwest"
+    kind: REGION_KIND_RESTRICTED
+    minimum { x_mm: 500 y_mm: 6000 }
+    maximum { x_mm: 1500 y_mm: 7000 }
+    energy_multiplier_permille: 1000
+  }
+}
+vehicles {
+  id: "uav-alpha"
+  kind: "uav"
+  initial_position { x_mm: 1000 y_mm: 1000 }
+  max_speed_mm_s: 2000
+  initial_energy_mj: 1000000
+  energy_cost_mj_per_meter: 1000
+  payload_grams: 1000
+  capabilities: CAPABILITY_SEARCH
+  capabilities: CAPABILITY_RELAY
+  terrain_access: "air"
+}
+vehicles {
+  id: "ugv-bravo"
+  kind: "ugv"
+  initial_position { x_mm: 1000 y_mm: 4000 }
+  max_speed_mm_s: 1000
+  initial_energy_mj: 1500000
+  energy_cost_mj_per_meter: 1500
+  payload_grams: 5000
+  capabilities: CAPABILITY_INSPECTION
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "ground"
+}
+vehicles {
+  id: "uav-charlie"
+  kind: "uav"
+  initial_position { x_mm: 7000 y_mm: 1000 }
+  max_speed_mm_s: 2500
+  initial_energy_mj: 1200000
+  energy_cost_mj_per_meter: 1100
+  payload_grams: 2000
+  capabilities: CAPABILITY_RELAY
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "air"
+}
+tasks {
+  id: "search-sector-a"
+  kind: "search"
+  target { x_mm: 5000 y_mm: 1000 }
+  required_capability: CAPABILITY_SEARCH
+  deadline_tick: 80
+  completion_radius_mm: 50
+  assigned_agent_id: "uav-alpha"
+  released: true
+}
+tasks {
+  id: "inspect-site-b"
+  kind: "inspection"
+  target { x_mm: 4000 y_mm: 4000 }
+  required_capability: CAPABILITY_INSPECTION
+  deadline_tick: 80
+  completion_radius_mm: 50
+  assigned_agent_id: "ugv-bravo"
+  released: true
+}
+tasks {
+  id: "relay-point-c"
+  kind: "relay"
+  target { x_mm: 7000 y_mm: 5000 }
+  required_capability: CAPABILITY_RELAY
+  deadline_tick: 80
+  completion_radius_mm: 50
+  assigned_agent_id: "uav-charlie"
+  released: true
+}
+network_profile: "nominal"

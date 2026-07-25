@@ -1,0 +1,148 @@
+schema_version: 1
+name: "chokepoint-nearest"
+seed: 481729305
+step_ms: 100
+max_ticks: 320
+failure_detection_ticks: 5
+world {
+  width_mm: 6000
+  height_mm: 4000
+  grid_cell_mm: 100
+  map_version: 1
+  regions {
+    id: "barrier-lower"
+    kind: REGION_KIND_OBSTACLE
+    minimum { x_mm: 2800 y_mm: 0 }
+    maximum { x_mm: 3200 y_mm: 1700 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "barrier-upper"
+    kind: REGION_KIND_OBSTACLE
+    minimum { x_mm: 2800 y_mm: 2300 }
+    maximum { x_mm: 3200 y_mm: 4000 }
+    energy_multiplier_permille: 1000
+  }
+  regions {
+    id: "central-pass"
+    kind: REGION_KIND_CHOKEPOINT
+    minimum { x_mm: 2800 y_mm: 1800 }
+    maximum { x_mm: 3200 y_mm: 2200 }
+    energy_multiplier_permille: 1000
+  }
+  locations {
+    id: "return-east"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 5500 y_mm: 2000 }
+    radius_mm: 200
+  }
+  locations {
+    id: "return-north"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 500 y_mm: 3500 }
+    radius_mm: 200
+  }
+  locations {
+    id: "return-west"
+    kind: LOCATION_KIND_RETURN
+    position { x_mm: 500 y_mm: 2000 }
+    radius_mm: 200
+  }
+}
+vehicles {
+  id: "uav-alpha"
+  kind: "uav"
+  initial_position { x_mm: 1000 y_mm: 2000 }
+  max_speed_mm_s: 2000
+  initial_energy_mj: 300000
+  energy_cost_mj_per_meter: 800
+  payload_grams: 1000
+  capabilities: CAPABILITY_SEARCH
+  terrain_access: "air"
+  return_location_id: "return-west"
+}
+vehicles {
+  id: "ugv-bravo"
+  kind: "ugv"
+  initial_position { x_mm: 5000 y_mm: 2000 }
+  max_speed_mm_s: 2000
+  initial_energy_mj: 360000
+  energy_cost_mj_per_meter: 1000
+  payload_grams: 5000
+  capabilities: CAPABILITY_INSPECTION
+  terrain_access: "ground"
+  return_location_id: "return-east"
+}
+vehicles {
+  id: "uav-charlie"
+  kind: "uav"
+  initial_position { x_mm: 500 y_mm: 3500 }
+  max_speed_mm_s: 1800
+  initial_energy_mj: 320000
+  energy_cost_mj_per_meter: 850
+  payload_grams: 2500
+  capabilities: CAPABILITY_RELAY
+  capabilities: CAPABILITY_DELIVERY
+  terrain_access: "air"
+  return_location_id: "return-north"
+}
+tasks {
+  id: "delivery-north"
+  kind: "delivery"
+  target { x_mm: 1800 y_mm: 3500 }
+  required_capability: CAPABILITY_DELIVERY
+  payload_required_grams: 1500
+  deadline_tick: 280
+  completion_radius_mm: 100
+  released: true
+  service_ticks: 4
+  service_energy_mj_per_tick: 600
+  priority: 60
+}
+tasks {
+  id: "inspect-west"
+  kind: "inspection"
+  target { x_mm: 1000 y_mm: 2000 }
+  required_capability: CAPABILITY_INSPECTION
+  deadline_tick: 280
+  completion_radius_mm: 100
+  released: true
+  service_ticks: 4
+  service_energy_mj_per_tick: 500
+  priority: 80
+}
+tasks {
+  id: "relay-north"
+  kind: "relay"
+  target { x_mm: 1200 y_mm: 3500 }
+  required_capability: CAPABILITY_RELAY
+  deadline_tick: 280
+  completion_radius_mm: 100
+  released: true
+  service_ticks: 4
+  service_energy_mj_per_tick: 400
+  priority: 70
+}
+tasks {
+  id: "search-east"
+  kind: "search"
+  target { x_mm: 5000 y_mm: 2000 }
+  required_capability: CAPABILITY_SEARCH
+  deadline_tick: 280
+  completion_radius_mm: 100
+  released: true
+  service_ticks: 4
+  service_energy_mj_per_tick: 400
+  priority: 90
+}
+network_profile: "connected"
+allocation_policy: ALLOCATION_POLICY_NEAREST_CAPABLE
+network_profiles {
+  id: "connected"
+  latency_ticks: 1
+  jitter_ticks: 0
+  packet_loss_permyriad: 0
+  bandwidth_bytes_per_tick: 8192
+  reorder_permyriad: 0
+  reorder_window_ticks: 0
+}

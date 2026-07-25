@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>sentinel_gazebo</name>
+  <version>0.1.0</version>
+  <description>Gazebo presentation adapter for Sentinel replay traces</description>
+  <maintainer email="noreply@sentinel.local">Sentinel</maintainer>
+  <license>All rights reserved</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>protobuf</build_depend>
+  <depend>rclcpp</depend>
+  <depend>ros_gz_interfaces</depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

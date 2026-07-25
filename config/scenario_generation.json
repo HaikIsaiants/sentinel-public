@@ -1,0 +1,212 @@
+{
+  "namespace": "sentinel-scenario-v1",
+  "clock": {
+    "step_ms": 100,
+    "max_ticks": 6000,
+    "failure_detection_ticks": 5
+  },
+  "quantization": {
+    "probability_scale": 10000,
+    "multiplier_scale": 1000
+  },
+  "world": {
+    "width_meters": 160,
+    "height_meters": 120,
+    "grid_cell_meters": 1,
+    "map_version": 1,
+    "terrain_size_cells": [
+      4,
+      6
+    ],
+    "terrain_energy_multiplier_permille": [
+      1050,
+      1450
+    ],
+    "terrain_candidates_cells": [
+      [24, 62],
+      [44, 76],
+      [66, 62],
+      [86, 78],
+      [108, 62],
+      [128, 78],
+      [34, 88],
+      [96, 90],
+      [58, 92],
+      [118, 92]
+    ],
+    "terrain_labels": [
+      "air",
+      "common",
+      "ground"
+    ],
+    "chokepoint_size_cells": [
+      2,
+      6
+    ],
+    "chokepoint_candidates_cells": [
+      [54, 44],
+      [76, 52],
+      [100, 44],
+      [122, 52]
+    ],
+    "return_location_cells": [5, 15],
+    "charging_location_cells": [
+      [80, 20],
+      [154, 94]
+    ],
+    "location_radius_mm": 1000,
+    "charging_rate_mj_per_tick": [
+      30000,
+      60000
+    ]
+  },
+  "vehicles": {
+    "class_order": [
+      "uav",
+      "ugv"
+    ],
+    "initial_positions_cells": [
+      [10, 20],
+      [150, 90],
+      [20, 90],
+      [140, 20],
+      [80, 30]
+    ],
+    "anchor_agent_index": 0,
+    "degradation_agent_index": 2,
+    "anchor_speed_mm_s": {
+      "temporary_partition": 1600,
+      "blocked_route": 1600,
+      "agent_loss_degradation": 580,
+      "compound_disruption": 580
+    },
+    "uav": {
+      "speed_mm_s": [
+        5000,
+        8000
+      ],
+      "initial_energy_mj": [
+        9000000,
+        13000000
+      ],
+      "energy_cost_mj_per_meter": [
+        450,
+        850
+      ],
+      "payload_grams": [
+        12000,
+        18000
+      ],
+      "terrain_access": [
+        "air",
+        "common"
+      ]
+    },
+    "ugv": {
+      "speed_mm_s": [
+        3000,
+        5000
+      ],
+      "initial_energy_mj": [
+        14000000,
+        20000000
+      ],
+      "energy_cost_mj_per_meter": [
+        800,
+        1400
+      ],
+      "payload_grams": [
+        18000,
+        26000
+      ],
+      "terrain_access": [
+        "common",
+        "ground"
+      ]
+    },
+    "capability_templates": [
+      [
+        "search",
+        "relay",
+        "delivery"
+      ],
+      [
+        "search",
+        "inspection",
+        "delivery"
+      ],
+      [
+        "search",
+        "inspection",
+        "relay"
+      ],
+      [
+        "inspection",
+        "relay",
+        "delivery"
+      ],
+      [
+        "search",
+        "inspection",
+        "relay",
+        "delivery"
+      ]
+    ]
+  },
+  "tasks": {
+    "type_order": [
+      "search",
+      "inspection",
+      "relay",
+      "delivery"
+    ],
+    "target_candidates_cells": [
+      [150, 90],
+      [10, 90],
+      [150, 20],
+      [20, 50],
+      [140, 50],
+      [80, 90],
+      [40, 30],
+      [120, 30],
+      [80, 50],
+      [30, 40],
+      [130, 40],
+      [70, 30]
+    ],
+    "service_ticks": [
+      8,
+      24
+    ],
+    "service_energy_mj_per_tick": [
+      400,
+      1200
+    ],
+    "initial_priority": [
+      35,
+      90
+    ],
+    "delivery_payload_grams": [
+      500,
+      1400
+    ],
+    "completion_radius_mm": 1000,
+    "deadline_tick": 6000,
+    "deadline_lower_bound_numerator": 9,
+    "deadline_lower_bound_denominator": 5,
+    "anchor_target_cells": [150, 90],
+    "anchor_service_ticks": 20,
+    "anchor_service_energy_mj_per_tick": 400,
+    "anchor_priority": 100,
+    "anchor_strata": [
+      "temporary_partition",
+      "blocked_route",
+      "agent_loss_degradation",
+      "compound_disruption"
+    ],
+    "arrival_service_ticks": [
+      8,
+      18
+    ]
+  }
+}

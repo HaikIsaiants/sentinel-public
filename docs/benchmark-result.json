@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "sentinel-v1",
+  "benchmark_version": 1,
+  "recorded_date": "2026-07-19",
+  "diagnostic_date": "2026-07-20",
+  "corpus": {
+    "seed_count": 10000,
+    "allocator_count": 2,
+    "result_rows": 20000,
+    "initial_fleet_size_counts": {
+      "3": 3299,
+      "4": 3309,
+      "5": 3392
+    },
+    "requires_uav_and_ugv": true
+  },
+  "allocators": {
+    "sentinel_cbba": {
+      "mission_successes": 9998,
+      "mission_count": 10000,
+      "completion_rate": 0.9998,
+      "degraded_successes": 5999,
+      "degraded_count": 6000,
+      "degraded_completion_rate": 0.9998333333333334,
+      "degraded_wilson_lower_one_sided_95": 0.9992532791535975,
+      "mean_makespan_seconds": 158.17261000000002
+    },
+    "nearest_capable": {
+      "mission_successes": 9893,
+      "mission_count": 10000,
+      "completion_rate": 0.9893,
+      "degraded_successes": 5988,
+      "degraded_count": 6000,
+      "degraded_completion_rate": 0.998,
+      "degraded_wilson_lower_one_sided_95": 0.996800851285521,
+      "mean_makespan_seconds": 229.16123000000002
+    }
+  },
+  "paired_makespan_reduction": 0.3097758726465205,
+  "sentinel_reassignment_after_detection": {
+    "completed_samples": 1500,
+    "missing_samples": 0,
+    "mean_seconds": 0.19666666666666666,
+    "p95_seconds": 0.5,
+    "maximum_seconds": 0.7
+  },
+  "timeout_notes": {
+    "supervisor_timeouts": 2,
+    "recorded_makespan_seconds": 600,
+    "diagnostic_completions": 2
+  },
+  "results_sha256": "56adb9b16999d87ba6ba173d774a07e73c6afc33fcb0af524a01b004d3e39587"
+}

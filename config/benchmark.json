@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "benchmark_id": "sentinel-v1",
+  "seed_derivation_namespace": "sentinel-stage1-v1",
+  "clock": {
+    "tick_seconds": 0.1,
+    "mission_horizon_seconds": 600.0,
+    "mission_horizon_ticks": 6000
+  },
+  "corpora": {
+    "development": {
+      "missions": 2000,
+      "missions_per_stratum": 200
+    },
+    "holdout": {
+      "missions": 10000,
+      "missions_per_stratum": 1000
+    }
+  },
+  "allocators": [
+    "sentinel_cbba",
+    "nearest_capable"
+  ],
+  "degraded_communications_strata": [
+    "latency_jitter",
+    "packet_loss_reordering",
+    "bandwidth_limited",
+    "temporary_partition",
+    "combined_communications",
+    "compound_disruption"
+  ],
+  "wilson_z": 1.6448536269514722,
+  "hard_invariants": [
+    "completed_tasks_are_never_reassigned",
+    "incapable_agents_never_commit_tasks",
+    "committed_reservations_never_overlap",
+    "agent_energy_never_drops_below_zero",
+    "terminal_replay_hash_matches"
+  ]
+}

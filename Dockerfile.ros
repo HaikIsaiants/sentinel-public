@@ -1,0 +1,19 @@
+FROM ros:jazzy-ros-base
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential cmake ninja-build protobuf-compiler libprotobuf-dev libeigen3-dev python3-protobuf python3-colcon-common-extensions ros-jazzy-ros-gz && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /sentinel
+
+COPY . .
+
+RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF && cmake --build build --parallel 2
+
+RUN PYTHONPATH=/sentinel/build/python python3 tools/run_scenario.py --sim build/bin/sentinel_sim --agent build/bin/sentinel_agent --scenario scenarios/compound_failure_cbba.textproto --output out/demo --repeat 2 --require-complete-reassignments
+
+RUN build/bin/sentinel_sim export --scenario scenarios/compound_failure_cbba.textproto --log out/demo/run-0.events.pb --trace out/demo/demo.trace.pb
+
+RUN bash -lc "source /opt/ros/jazzy/setup.bash && colcon build --base-paths /sentinel/ros2 --build-base /sentinel/ros-build --install-base /sentinel/ros-install --parallel-workers 2"
+
+CMD ["bash", "-lc", "source /opt/ros/jazzy/setup.bash && source /sentinel/ros-install/setup.bash && ros2 launch sentinel_gazebo demo.launch.py trace:=/sentinel/out/demo/demo.trace.pb gz_args:='-s -r -v 2'"]
